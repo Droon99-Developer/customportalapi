@@ -1,20 +1,25 @@
 package net.kyrptonaught.customportalapi;
 
+import eu.pb4.polymer.api.block.PolymerBlock;
+import eu.pb4.polymer.api.client.PolymerClientDecoded;
+import eu.pb4.polymer.api.client.PolymerKeepModel;
+import eu.pb4.polymer.api.networking.PolymerPacketUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.kyrptonaught.customportalapi.client.CustomPortalsModClient;
 import net.kyrptonaught.customportalapi.interfaces.EntityInCustomPortal;
+import net.kyrptonaught.customportalapi.networking.NetworkManager;
 import net.kyrptonaught.customportalapi.portal.frame.PortalFrameTester;
 import net.kyrptonaught.customportalapi.util.CustomPortalHelper;
 import net.kyrptonaught.customportalapi.util.CustomTeleporter;
 import net.kyrptonaught.customportalapi.util.PortalLink;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.ShapeContext;
+import net.minecraft.block.*;
+import net.minecraft.block.entity.EndPortalBlockEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.particle.BlockStateParticleEffect;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.state.StateManager;
@@ -29,7 +34,7 @@ import net.minecraft.world.WorldAccess;
 
 import java.util.Random;
 
-public class CustomPortalBlock extends Block {
+public class CustomPortalBlock extends Block implements PolymerBlock, PolymerKeepModel, PolymerClientDecoded {
     public static final EnumProperty<Direction.Axis> AXIS = Properties.AXIS;
     protected static final VoxelShape X_SHAPE = Block.createCuboidShape(0.0D, 0.0D, 6.0D, 16.0D, 16.0D, 10.0D);
     protected static final VoxelShape Z_SHAPE = Block.createCuboidShape(6.0D, 0.0D, 0.0D, 10.0D, 16.0D, 16.0D);
@@ -38,6 +43,53 @@ public class CustomPortalBlock extends Block {
     public CustomPortalBlock(Settings settings) {
         super(settings);
         this.setDefaultState(this.stateManager.getDefaultState().with(AXIS, Direction.Axis.X));
+    }
+
+    @Override
+    public Block getPolymerBlock(BlockState state) {
+        if (state.get(AXIS).isVertical()) {
+            return Blocks.END_PORTAL;
+        } else {
+            return Blocks.NETHER_PORTAL;
+        }
+    }
+
+    @Override
+    public Block getPolymerBlock(ServerPlayerEntity player, BlockState state) {
+        if (NetworkManager.doesPlayerHaveMod(player)) {
+            return this;
+        } else {
+            return getPolymerBlock(state);
+        }
+    }
+
+    @Override
+    public BlockState getPolymerBlockState(BlockState state) {
+        Direction.Axis currentAxis = state.get(AXIS);
+        if (currentAxis.isVertical()) {
+            return Blocks.END_PORTAL.getDefaultState();
+        } else {
+            return Blocks.NETHER_PORTAL.getDefaultState().with(NetherPortalBlock.AXIS, currentAxis);
+        }
+    }
+
+    @Override
+    public BlockState getPolymerBlockState(ServerPlayerEntity player, BlockState state) {
+        if (NetworkManager.doesPlayerHaveMod(player)) {
+            return state;
+        } else {
+            return getPolymerBlockState(state);
+        }
+    }
+
+    @Override
+    public void onPolymerBlockSend(ServerPlayerEntity player, BlockPos.Mutable pos, BlockState blockState) {
+        if (!NetworkManager.doesPlayerHaveMod(player)) { // If the player is vanilla
+            if (blockState.get(AXIS).isVertical()) { // If it should be an end portal
+                // Send the client a packet to give the end portal its block entity
+                player.networkHandler.sendPacket(BlockEntityUpdateS2CPacket.create(new EndPortalBlockEntity(pos.toImmutable(), Blocks.END_PORTAL.getDefaultState())));
+            }
+        }
     }
 
     @Override
