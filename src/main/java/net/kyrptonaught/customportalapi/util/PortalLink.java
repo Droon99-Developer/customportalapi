@@ -18,7 +18,7 @@ public class PortalLink {
     private CustomPortalBlock portalBlock = CustomPortalsMod.portalBlock;
     public Identifier dimID;
     public Identifier returnDimID = new Identifier("overworld");
-    public boolean onlyIgnitableInReturnDim = false;
+    public boolean onlyIgnitableInReturnDim = true;
     public int colorID;
     public int forcedWidth, forcedHeight;
     public Identifier portalFrameTester = CustomPortalsMod.VANILLAPORTAL_FRAMETESTER;
