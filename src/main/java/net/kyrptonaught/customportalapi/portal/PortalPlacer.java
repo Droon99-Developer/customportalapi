@@ -43,13 +43,15 @@ public class PortalPlacer {
         return false;
     }
 
-    public static Optional<Rectangle> createDestinationPortal(World world, BlockPos blockPos, BlockState frameBlock, Direction.Axis axis) {
+    public static Optional<Rectangle> createDestinationPortal(double scaleFactor, World world, BlockPos blockPos, BlockState frameBlock, Direction.Axis axis) {
         WorldBorder worldBorder = world.getWorldBorder();
         PortalLink link = CustomPortalApiRegistry.getPortalLinkFromBase(frameBlock.getBlock());
         PortalFrameTester portalFrameTester = link.getFrameTester().createInstanceOfPortalFrameTester();
 
+        int searchAreaSize = (int)Math.ceil(16 * scaleFactor * world.getDimension().coordinateScale());
+
         // Try to connect to an unlinked existing portal near our destination
-        for (BlockPos testingPos : BlockPos.iterateOutwards(blockPos, (int)Math.ceil(8 * world.getDimension().coordinateScale()), 64, (int)Math.ceil(8 * world.getDimension().coordinateScale()))) {
+        for (BlockPos testingPos : BlockPos.iterateOutwards(blockPos, searchAreaSize, 64, searchAreaSize)) {
             if (!worldBorder.contains(testingPos)) continue;
 
             if (world.getBlockState(testingPos).getBlock() == link.getPortalBlock()) {

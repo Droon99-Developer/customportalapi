@@ -74,7 +74,7 @@ public class CustomTeleporter {
         double zMax = Math.min(2.9999872E7D, worldBorder.getBoundSouth() - 16.0D);
         double scaleFactor = DimensionType.getCoordinateScaleFactor(entity.world.getDimension(), destination.getDimension());
         BlockPos blockPos3 = new BlockPos(MathHelper.clamp(entity.getX() * scaleFactor, xMin, xMax), entity.getY(), MathHelper.clamp(entity.getZ() * scaleFactor, zMin, zMax));
-        Optional<BlockLocating.Rectangle> portal = PortalPlacer.createDestinationPortal(destination, blockPos3, frameBlock, axis);
+        Optional<BlockLocating.Rectangle> portal = PortalPlacer.createDestinationPortal(scaleFactor, destination, blockPos3, frameBlock, axis);
         if (portal.isPresent()) {
             PortalFrameTester portalFrameTester = CustomPortalApiRegistry.getPortalLinkFromBase(frameBlock.getBlock()).getFrameTester().createInstanceOfPortalFrameTester();
 
