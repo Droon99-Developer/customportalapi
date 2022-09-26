@@ -50,7 +50,7 @@ public abstract class PortalFrameTester {
 
     public abstract Direction.Axis getAxis2();
 
-    public abstract BlockPos doesPortalFitAt(World world, BlockPos attemptPos, Direction.Axis axis);
+    public abstract BlockPos doesPortalFitAt(World world, BlockPos attemptPos, Direction.Axis axis, BlockState frameBlock);
 
     public abstract Vec3d getEntityOffsetInPortal(BlockLocating.Rectangle arg, Entity entity, Direction.Axis portalAxis);
 

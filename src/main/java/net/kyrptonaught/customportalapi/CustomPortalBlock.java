@@ -3,7 +3,6 @@ package net.kyrptonaught.customportalapi;
 import eu.pb4.polymer.api.block.PolymerBlock;
 import eu.pb4.polymer.api.client.PolymerClientDecoded;
 import eu.pb4.polymer.api.client.PolymerKeepModel;
-import eu.pb4.polymer.api.networking.PolymerPacketUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.kyrptonaught.customportalapi.client.CustomPortalsModClient;
@@ -109,7 +108,11 @@ public class CustomPortalBlock extends Block implements PolymerBlock, PolymerKee
             if (portalFrameTester.isAlreadyLitPortalFrame())
                 return super.getStateForNeighborUpdate(state, direction, newState, world, pos, posFrom);
         }
-        //todo handle unknown portallink
+
+        // This could be the lower-left corner of the portal (maybe not but either way it doesn't really matter)
+        // The portal's destination is stored in the lower-left corner
+        // So we should delete the link
+        CustomPortalsMod.portalLinkingStorage.removeLink(pos, ((World) world).getRegistryKey().getValue());
 
         return Blocks.AIR.getDefaultState();
     }

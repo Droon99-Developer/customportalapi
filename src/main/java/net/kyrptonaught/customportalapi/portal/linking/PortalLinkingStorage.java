@@ -46,9 +46,20 @@ public class PortalLinkingStorage extends PersistentState {
     }
 
     public DimensionalBlockPos getDestination(BlockPos portalFramePos, RegistryKey<World> dimID) {
-        if (portalLinks.containsKey(dimID.getValue()))
-            return portalLinks.get(dimID.getValue()).get(portalFramePos);
+        var dimension = portalLinks.get(dimID.getValue());
+        if (dimension != null)
+            return dimension.get(portalFramePos);
         return null;
+    }
+
+    public void removeLink(BlockPos portalFramePos, Identifier dimID) {
+        var dimension = portalLinks.get(dimID);
+        if (dimension != null) {
+            DimensionalBlockPos destinationPos = dimension.remove(portalFramePos);
+            if (destinationPos != null) {
+                removeLink(destinationPos.pos, destinationPos.dimensionType);
+            }
+        }
     }
 
     public void createLink(BlockPos portalFramePos, RegistryKey<World> dimID, BlockPos destPortalFramePos, RegistryKey<World> destDimID) {
@@ -57,8 +68,7 @@ public class PortalLinkingStorage extends PersistentState {
     }
 
     private void addLink(BlockPos portalFramePos, Identifier dimID, BlockPos destPortalFramePos, Identifier destDimID) {
-        if (!portalLinks.containsKey(dimID))
-            portalLinks.put(dimID, new ConcurrentHashMap<>());
+        portalLinks.putIfAbsent(dimID, new ConcurrentHashMap<>()); // Insert the dimension map if needed
         portalLinks.get(dimID).put(portalFramePos, new DimensionalBlockPos(destDimID, destPortalFramePos));
     }
 

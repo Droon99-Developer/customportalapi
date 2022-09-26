@@ -137,7 +137,7 @@ public class FlatPortalAreaHelper extends PortalFrameTester {
     }
 
     @Override
-    public BlockPos doesPortalFitAt(World world, BlockPos attemptPos, Direction.Axis axis) {
+    public BlockPos doesPortalFitAt(World world, BlockPos attemptPos, Direction.Axis axis, BlockState frameBlock) {
         BlockLocating.Rectangle rect = BlockLocating.getLargestRectangle(attemptPos.up(), Direction.Axis.X, 4, Direction.Axis.Z, 4, blockPos -> {
             return world.getBlockState(blockPos).getMaterial().isSolid() &&
                     !world.getBlockState(blockPos.up()).getMaterial().isSolid() && !world.getBlockState(blockPos.up()).getMaterial().isLiquid() &&

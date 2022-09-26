@@ -104,23 +104,61 @@ public class VanillaPortalAreaHelper extends PortalFrameTester {
     }
 
     @Override
-    public BlockPos doesPortalFitAt(World world, BlockPos attemptPos, Direction.Axis axis) {
-        if (isEmptySpace(world.getBlockState(attemptPos)) && isEmptySpace(world.getBlockState(attemptPos.offset(axis, 1))) &&
-                isEmptySpace(world.getBlockState(attemptPos.up())) && isEmptySpace(world.getBlockState(attemptPos.offset(axis, 1).up())) &&
-                isEmptySpace(world.getBlockState(attemptPos.up(2))) && isEmptySpace(world.getBlockState(attemptPos.offset(axis, 1).up(2))) &&
-                canHoldPortal(world, attemptPos.down()) && canHoldPortal(world, attemptPos.offset(axis, 1).down()))
-            return attemptPos;
+    public BlockPos doesPortalFitAt(World world, BlockPos attemptPos, Direction.Axis axis, BlockState frameBlock) {
+        // Loop over the entire portal
+        Direction.Axis rotatedAxis = axis == Direction.Axis.X ? Direction.Axis.Z : Direction.Axis.X;
+        for (int h = -1; h < 3; h++) { // Loop over the horizontal
+            for (int v = -1; v < 4; v++) { // Loop over the vertical
+                BlockPos blockPos = attemptPos.up(v).offset(axis, h);
+                if (v == -1) { // Floor
+                    if (!isValidFloor(world, blockPos, world.getBlockState(blockPos), frameBlock)) {
+                        return null;
+                    }
+                } else if (h == -1 || h == 2) { // Side walls
+                    if (!isValidWall(world.getBlockState(blockPos), frameBlock)) {
+                        return null;
+                    }
+                } else if (v == 3) { // Ceiling
+                    if (!isValidCeiling(world.getBlockState(blockPos), frameBlock)) {
+                        return null;
+                    }
+                } else { // Center
+                    if (!isValidInner(world.getBlockState(blockPos))) {
+                        return null;
+                    }
+                    // Make sure the things on the side are air/valid
+                    if (!isValidSide(world.getBlockState(blockPos.offset(rotatedAxis, 1)))) {
+                        return null;
+                    }
+                    if (!isValidSide(world.getBlockState(blockPos.offset(rotatedAxis, -1)))) {
+                        return null;
+                    }
+                }
+            }
+        }
 
-        return null;
+        // If we found no reason for the portal not to fit
+        return attemptPos;
     }
 
-    protected boolean isEmptySpace(BlockState blockState) {
+    private boolean isValidInner(BlockState blockState) {
         return blockState.getMaterial().isReplaceable() && !blockState.getMaterial().isLiquid();
     }
 
-    protected boolean canHoldPortal(World world, BlockPos pos) {
-        BlockState blockState = world.getBlockState(pos);
-        return blockState.getMaterial().isSolid() && blockState.isSolidBlock(world, pos) && !blockState.getMaterial().isLiquid() && !blockState.getMaterial().equals(Material.LEAVES);
+    private boolean isValidCeiling(BlockState blockState, BlockState frameBlock) {
+        return (blockState.getMaterial().isReplaceable() && !blockState.getMaterial().isLiquid()) || blockState.equals(frameBlock);
+    }
+
+    private boolean isValidWall(BlockState blockState, BlockState frameBlock) {
+        return (blockState.getMaterial().isReplaceable() && !blockState.getMaterial().isLiquid()) || blockState.equals(frameBlock);
+    }
+
+    private boolean isValidFloor(World world, BlockPos pos, BlockState blockState, BlockState frameBlock) {
+        return (blockState.getMaterial().isSolid() && blockState.isSolidBlock(world, pos) && !blockState.getMaterial().isLiquid()) || blockState.equals(frameBlock);
+    }
+
+    private boolean isValidSide(BlockState blockState) {
+        return blockState.getMaterial().isReplaceable() && !blockState.getMaterial().isLiquid();
     }
 
     @Override
