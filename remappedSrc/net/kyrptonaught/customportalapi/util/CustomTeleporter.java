@@ -13,7 +13,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ChunkTicketType;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.*;
-import net.minecraft.registry.RegistryKey;
+import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.BlockLocating;
 import net.minecraft.world.Heightmap;
 import net.minecraft.world.TeleportTarget;

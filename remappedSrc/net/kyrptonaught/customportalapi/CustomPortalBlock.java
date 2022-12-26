@@ -1,8 +1,8 @@
 package net.kyrptonaught.customportalapi;
 
-import eu.pb4.polymer.core.api.block.PolymerBlock;
-//import eu.pb4.polymer.core.api.client.PolymerClientDecoded;
-//import eu.pb4.polymer.core.api.client.PolymerKeepModel;
+import eu.pb4.polymer.api.block.PolymerBlock;
+import eu.pb4.polymer.api.client.PolymerClientDecoded;
+import eu.pb4.polymer.api.client.PolymerKeepModel;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.kyrptonaught.customportalapi.client.CustomPortalsModClient;
@@ -33,7 +33,7 @@ import net.minecraft.world.WorldAccess;
 
 import java.util.Random;
 
-public class CustomPortalBlock extends Block implements PolymerBlock/*, PolymerKeepModel, PolymerClientDecoded*/{
+public class CustomPortalBlock extends Block implements PolymerBlock, PolymerKeepModel, PolymerClientDecoded {
     public static final EnumProperty<Direction.Axis> AXIS = Properties.AXIS;
     protected static final VoxelShape X_SHAPE = Block.createCuboidShape(0.0D, 0.0D, 6.0D, 16.0D, 16.0D, 10.0D);
     protected static final VoxelShape Z_SHAPE = Block.createCuboidShape(6.0D, 0.0D, 0.0D, 10.0D, 16.0D, 16.0D);
@@ -53,7 +53,7 @@ public class CustomPortalBlock extends Block implements PolymerBlock/*, PolymerK
         }
     }
 
-    //@Override
+    @Override
     public Block getPolymerBlock(ServerPlayerEntity player, BlockState state) {
         if (NetworkManager.doesPlayerHaveMod(player)) {
             return this;
@@ -72,7 +72,7 @@ public class CustomPortalBlock extends Block implements PolymerBlock/*, PolymerK
         }
     }
 
-    //@Override
+    @Override
     public BlockState getPolymerBlockState(ServerPlayerEntity player, BlockState state) {
         if (NetworkManager.doesPlayerHaveMod(player)) {
             return state;
@@ -81,7 +81,7 @@ public class CustomPortalBlock extends Block implements PolymerBlock/*, PolymerK
         }
     }
 
-   // @Override
+    @Override
     public void onPolymerBlockSend(ServerPlayerEntity player, BlockPos.Mutable pos, BlockState blockState) {
         if (!NetworkManager.doesPlayerHaveMod(player)) { // If the player is vanilla
             if (blockState.get(AXIS).isVertical()) { // If it should be an end portal
@@ -168,6 +168,4 @@ public class CustomPortalBlock extends Block implements PolymerBlock/*, PolymerK
     public Block getPortalBase(World world, BlockPos pos) {
         return CustomPortalHelper.getPortalBaseDefault(world, pos);
     }
-
-
 }
